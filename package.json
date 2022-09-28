@@ -1,0 +1,22 @@
+{
+  "name": "spotapi-token",
+  "version": "1.0.0",
+  "description": "private spotify api token generator with custom scope.",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "spotify",
+    "api",
+    "token",
+    "express-js"
+  ],
+  "author": "Fariz",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.27.2",
+    "dotenv": "^16.0.2",
+    "express": "^4.18.1"
+  }
+}

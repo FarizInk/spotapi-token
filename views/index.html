@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Spotapi</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio,line-clamp"></script>
+  </head>
+  <body>
+    <div class="flex min-h-screen">
+      <div
+        class="flex flex-1 flex-col justify-center py-12 px-4 sm:px-6 lg:flex-none lg:px-20 xl:px-24"
+      >
+        <div class="mx-auto w-full max-w-sm lg:w-96">
+          <div class="mt-8">
+            <div class="mt-6">
+              <form action="/generate" method="POST" class="space-y-6">
+                <div>
+                  <label
+                    for="email"
+                    class="block text-sm font-medium text-gray-700"
+                    >Username</label
+                  >
+                  <div class="mt-1">
+                    <input
+                      id="username"
+                      name="username"
+                      type="text"
+                      required
+                      class="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+                    />
+                  </div>
+                </div>
+
+                <div class="space-y-1">
+                  <label
+                    for="password"
+                    class="block text-sm font-medium text-gray-700"
+                    >Password</label
+                  >
+                  <div class="mt-1">
+                    <input
+                      id="password"
+                      name="password"
+                      type="password"
+                      autocomplete="current-password"
+                      required
+                      class="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <div
+                    id="checkboxes"
+                    class="mt-4 divide-y divide-gray-200 border-t border-b border-gray-200"
+                  ></div>
+                </div>
+
+                <div>
+                  <button
+                    type="submit"
+                    class="flex w-full justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                  >
+                    Generate
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="relative hidden w-0 flex-1 lg:block">
+        <img
+          class="absolute inset-0 h-full w-full object-cover"
+          src="https://images.unsplash.com/photo-1505904267569-f02eaeb45a4c?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1908&q=80"
+          alt=""
+        />
+      </div>
+    </div>
+  </body>
+  <script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", function () {
+      axios
+        .get("/scopes")
+        .then(function (response) {
+          const data = response.data.data;
+          console.log(data);
+          let htmlCheckboxes = "";
+          data.forEach((item, index) => {
+            htmlCheckboxes = htmlCheckboxes + `
+              <div class="relative flex items-start py-4">
+                <div class="min-w-0 flex-1 text-sm">
+                  <label
+                    for="scope-${index}"
+                    class="select-none font-medium text-gray-700"
+                    >${item}</label
+                  >
+                </div>
+                <div class="ml-3 flex h-5 items-center">
+                  <input
+                    id="scope-${index}"
+                    name="scopes[]"
+                    type="checkbox"
+                    value="${item}"
+                    class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                  />
+                </div>
+              </div>
+            `;
+          });
+          document.getElementById("checkboxes").innerHTML = htmlCheckboxes
+        })
+        .catch(function (error) {
+          // handle error
+          console.log(error);
+        });
+    });
+  </script>
+</html>
