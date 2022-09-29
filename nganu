@@ -1,0 +1,18 @@
+#!/bin/bash
+
+if [ -x "$(command -v docker)" ]; then
+    echo "Running with Docker for at ${1}."
+    docker run -it --rm --user="${UID}:${GID}" --workdir="/app" --volume="${PWD}:/app" --name=spotapi-token node:latest npm install
+    docker run -it -d -p $1:3000 --rm --user="${UID}:${GID}" --workdir="/app" --volume="${PWD}:/app" --name=spotapi-token-$1 node:latest node app.js $1 $2
+    exit
+fi
+
+
+if [ -x "$(npm -v)" ]; then
+    echo "Running with node for at ${1}."
+    npm install
+    node app.js $1 $2
+    exit
+fi
+
+echo "Docker or Node not found in this environment, required one of it."
