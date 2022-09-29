@@ -23,7 +23,7 @@ let db = new sqlite3.Database(DBSOURCE, (err) => {
           // Table already created
         } else {
           // Table just created, creating some rows
-          var insert = 'INSERT INTO tokens (access_token, token_type, expires_in, refresh_token, scope) VALUES (?,?,?,?)'
+          var insert = 'INSERT INTO tokens (access_token, token_type, expires_in, refresh_token, scope) VALUES (?,?,?,?,?)'
           db.run(insert, ["aowkoakwokaw", "Bearer", 3600, 'refresh here', 'test ajah']);
         }
       });

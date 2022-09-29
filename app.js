@@ -5,8 +5,9 @@ const router = express.Router();
 require('dotenv').config();
 const port = process.env.PORT || 3000;
 const axios = require('axios');
-const qs = require('qs')
-var db = require("./database.js")
+const qs = require('qs');
+const db = require("./database.js");
+const helper = require('./helper.js');
 
 //add the router
 app.use('/', router);
@@ -55,7 +56,6 @@ router.get('/callback', function (req, res) {
       })
       .then(function (response) {
         const data = response.data;
-        console.log(data);
         db.run(
           `UPDATE tokens set 
           access_token = COALESCE(?,access_token), 
@@ -67,23 +67,16 @@ router.get('/callback', function (req, res) {
           [data.access_token, data.token_type, data.expires_in, data.refresh_token, data.scope, 1],
           function (err, result) {
             if (err) {
-              res.status(400).json({
-                "status": "error",
-                "message": err.message,
-                "data": null,
-              });
+              res.status(400).json(helper.JSONResponse("error", err.message, null));
               return;
             }
-            res.json({
-              status: "success",
-              message: "Success generate data access_token.",
-              data: data,
-            })
+            res.json(helper.JSONResponse("success", "Success generate data access_token.", data))
           });
       })
       .catch(function (error) {
         // handle error
-        console.log(error.response.data);
+        console.log(error);
+        res.status(400).json(helper.JSONResponse("error", error))
       });
   } else {
     res.redirect('/')
@@ -91,22 +84,14 @@ router.get('/callback', function (req, res) {
 })
 
 router.get('/token', function (req, res, next) {
-  var sql = "select * from tokens where id = 1"
-  var params = []
+  let sql = "select * from tokens where id = 1"
+  let params = []
   db.all(sql, params, (err, rows) => {
     if (err) {
-      res.status(400).json({
-        "status": "error",
-        "message": err.message,
-        "data": null,
-      });
-      return;
+        res.status(400).json(helper.JSONResponse("error", err.message, null));
+        return;
     }
-    res.send({
-      "status": "success",
-      "message": "Success retrieve data access_token.",
-      "data": rows[0] ?? null
-    })
+    res.send(helper.JSONResponse("success", "Success retrieve data access_token.", rows[0] ?? null));
   });
 });
 
