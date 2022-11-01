@@ -34,7 +34,7 @@ export const generateCode = (req, res) => {
     } else {
       scopes = config().SCOPES.split(",");
     }
-    res.redirect(`https://accounts.spotify.com/authorize?response_type=code&client_id=${config().CLIENT_ID}&scope=${encodeURI(scopes)}&state=${encodeURI(state)}&redirect_uri=${encodeURI(config().APP_BASE_URL + ":" + config().PORT + "/callback")}`);
+    res.redirect(`https://accounts.spotify.com/authorize?response_type=code&client_id=${config().CLIENT_ID}&scope=${encodeURI(scopes)}&state=${encodeURI(state)}&redirect_uri=${encodeURI(config().REDIRECT_URI_HOST + "/callback")}`);
   } else {
     res.redirect('/')
   }
@@ -51,7 +51,7 @@ export const callback = async (req, res) => {
       },
       body: new URLSearchParams({
         code: req.query.code,
-        redirect_uri: config().APP_BASE_URL + ":" + config().PORT + "/callback",
+        redirect_uri: config().REDIRECT_URI_HOST + "/callback",
         grant_type: "authorization_code",
       }),
     });
