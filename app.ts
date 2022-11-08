@@ -1,25 +1,42 @@
-import { json, opine, urlencoded, serveStatic } from "https://deno.land/x/opine@2.3.3/mod.ts";
+import { Application, Router, send, Status } from "https://deno.land/x/oak/mod.ts";
 import { dirname, join } from "https://deno.land/x/opine@2.3.3/deps.ts";
 import { config } from "https://deno.land/x/dotenv/mod.ts";
 import { getToken, getScopes, sendIndexView, generateCode, callback, getProfile } from "./handler.ts";
+import { oakCors } from "https://deno.land/x/cors/mod.ts";
 
-const app = opine();
+const router = new Router();
 const __dirname = dirname(import.meta.url);
-app.use(json()); // for parsing application/json
-app.use(urlencoded()); // for parsing application/x-www-form-urlencoded
-
-app.use(serveStatic(join(__dirname, "public")));
-app.use("/static", serveStatic(join(__dirname, "public")));
 
 const port = parseInt(config().PORT) || 3000;
 
-app.get("/", sendIndexView);
-app.get("/scopes", getScopes);
-app.get("/token", getToken);
-app.post("/generate", generateCode);
-app.get("/callback", callback);
-app.get("/profile", getProfile);
+router.get("/", sendIndexView);
+router.get("/scopes", getScopes);
+router.get("/token", getToken);
+router.post("/generate", generateCode);
+router.get("/callback", callback);
+router.get("/profile", getProfile);
 
-app.listen(port, () =>
-  console.log(`server has started on ${config().APP_BASE_URL}:${port} 🚀`)
-);
+
+const app = new Application();
+app.use(oakCors()); // Enable CORS for All Routes
+app.use(router.routes());
+app.use(router.allowedMethods())
+
+// static content
+app.use(async (context, next) => {
+    const root = `${Deno.cwd()}/public`
+    try {
+        await context.send({ root })
+    } catch {
+        next()
+    }
+})
+
+// page not found
+app.use(context => {
+  context.response.status = Status.NotFound
+  context.response.body = `"${context.request.url}" not found`
+})
+
+console.info(`CORS-enabled web server listening on port ${port}`);
+await app.listen({ port });
