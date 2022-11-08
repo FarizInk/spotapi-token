@@ -15,7 +15,7 @@ db.execute(`
 
 const token = db.query("SELECT * FROM tokens WHERE id = 1");
 if (token.length === 0) {
-  db.query("INSERT INTO tokens (access_token, token_type, expires_in, refresh_token, scope) VALUES (?,?,?,?,?)", ["test", "Bearer", 3600, 'refresh_token_here', 'just test']);
+  db.query("INSERT INTO tokens (access_token, token_type, expires_in, refresh_token, scope) VALUES (?,?,?,?,?)", [null, null, null, null, null]);
 }
 
 export default db;

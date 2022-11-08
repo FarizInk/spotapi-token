@@ -1,7 +1,7 @@
 import { Application, Router, send, Status } from "https://deno.land/x/oak/mod.ts";
 import { dirname, join } from "https://deno.land/x/opine@2.3.3/deps.ts";
 import { config } from "https://deno.land/x/dotenv/mod.ts";
-import { getToken, getScopes, sendIndexView, generateCode, callback, getProfile } from "./handler.ts";
+import { getToken, getScopes, sendIndexView, generateCode, callback, refresh, getProfile } from "./handler.ts";
 import { oakCors } from "https://deno.land/x/cors/mod.ts";
 
 const router = new Router();
@@ -14,6 +14,7 @@ router.get("/scopes", getScopes);
 router.get("/token", getToken);
 router.post("/generate", generateCode);
 router.get("/callback", callback);
+router.get("/refresh", refresh);
 router.get("/profile", getProfile);
 
 
