@@ -1,12 +1,15 @@
 import db from "./database.ts";
-import { config } from "https://deno.land/x/dotenv/mod.ts";
+import { config } from "https://deno.land/x/dotenv@v3.2.0/mod.ts";
+import { RouterContext } from "https://deno.land/x/oak@v11.1.0/router.ts";
+import { RowObject } from "https://deno.land/x/sqlite@v3.5.0/mod.ts";
 
-export const sendIndexView = async (context) => {
+
+export const sendIndexView = async (context: RouterContext<"/",Record<string|number,string|undefined>,Record<string,number>>) => {
   const view = await Deno.readTextFile("./views/index.html");
   context.response.body = view;
 };
 
-export const getScopes = (context) => {
+export const getScopes = (context: RouterContext<"/scopes",Record<string|number,string|undefined>,Record<string,number>>) => {
   const scopes = config().SCOPES;
   let data: string[] = [];
   if (scopes !== undefined && scopes !== null && scopes !== "") {
@@ -17,14 +20,14 @@ export const getScopes = (context) => {
   };
 };
 
-export const getToken = (context) => {
+export const getToken = (context: RouterContext<"/token",Record<string|number,string|undefined>,Record<string,number>>) => {
   const data = db.queryEntries("SELECT * FROM tokens WHERE id = 1");
   context.response.body = {
     data: data.length >= 1 ? data[0] : null,
   };
 };
 
-export const generateCode = async (context) => {
+export const generateCode = async (context: RouterContext<"/generate",Record<string|number,string|undefined>,Record<string,number>>) => {
   const body = context.request.body();
   const value = await body.value;
 
@@ -52,10 +55,15 @@ export const generateCode = async (context) => {
   }
 };
 
-export const callback = async (context) => {
+export const callback = async (context: RouterContext<"/callback",Record<string|number,string|undefined>,Record<string,number>>) => {
   const value = context.request.url.searchParams;
 
   if (value.get("error") === null) {
+    const params: Record<string, string> = {
+      code: value.get("code") ?? '',
+      redirect_uri: config().REDIRECT_URI_HOST + "/callback",
+      grant_type: "authorization_code",
+    }
     const getToken = await fetch("https://accounts.spotify.com/api/token", {
       method: "POST",
       headers: {
@@ -63,11 +71,7 @@ export const callback = async (context) => {
           "Basic " + btoa(config().CLIENT_ID + ":" + config().CLIENT_SECRET),
         "Content-Type": "application/x-www-form-urlencoded",
       },
-      body: new URLSearchParams({
-        code: value.get("code"),
-        redirect_uri: config().REDIRECT_URI_HOST + "/callback",
-        grant_type: "authorization_code",
-      }),
+      body: new URLSearchParams(params),
     });
 
     if (getToken.status === 200) {
@@ -89,10 +93,13 @@ export const callback = async (context) => {
   }
 };
 
-export const refresh = async (context) => {
-  const data = db.queryEntries("SELECT * FROM tokens WHERE id = 1");
+export const refresh = async (context: RouterContext<"/refresh",Record<string|number,string|undefined>,Record<string,number>>) => {
+  const data:RowObject[] = db.queryEntries("SELECT * FROM tokens WHERE id = 1");
   if (data.length >= 1) {
-    
+    const params: Record<string, any> = {
+      grant_type: "refresh_token",
+      refresh_token: data[0].refresh_token ?? '',
+    }
     const getToken = await fetch("https://accounts.spotify.com/api/token", {
       method: "POST",
       headers: {
@@ -100,10 +107,7 @@ export const refresh = async (context) => {
           "Basic " + btoa(config().CLIENT_ID + ":" + config().CLIENT_SECRET),
         "Content-Type": "application/x-www-form-urlencoded",
       },
-      body: new URLSearchParams({
-        grant_type: "refresh_token",
-        refresh_token: data[0].refresh_token,
-      }),
+      body: new URLSearchParams(params),
     });
 
     if (getToken.status === 200) {
@@ -131,7 +135,7 @@ export const refresh = async (context) => {
   }
 };
 
-export const getProfile = async (context) => {
+export const getProfile = async (context: RouterContext<"/profile",Record<string|number,string|undefined>,Record<string,number>>) => {
   const data = db.queryEntries("SELECT * FROM tokens WHERE id = 1");
   if (data.length >= 1) {
     const action = await fetch("https://api.spotify.com/v1/me", {
