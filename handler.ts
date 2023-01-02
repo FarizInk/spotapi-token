@@ -96,9 +96,9 @@ export const callback = async (context: RouterContext<"/callback",Record<string|
 export const refresh = async (context: RouterContext<"/refresh",Record<string|number,string|undefined>,Record<string,number>>) => {
   const data:RowObject[] = db.queryEntries("SELECT * FROM tokens WHERE id = 1");
   if (data.length >= 1) {
-    const params: Record<string, any> = {
+    const params: Record<string, string> = {
       grant_type: "refresh_token",
-      refresh_token: data[0].refresh_token ?? '',
+      refresh_token: data[0].refresh_token ? data[0].refresh_token.toString() : '',
     }
     const getToken = await fetch("https://accounts.spotify.com/api/token", {
       method: "POST",
